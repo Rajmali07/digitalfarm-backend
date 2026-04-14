@@ -11,18 +11,22 @@ const app = express();
 
 // Security middleware
 app.use(cors({
-  origin: [
-    "http://127.0.0.1:5500",
-    "http://localhost:5500"
-  ],
+  origin: "*",
   credentials: true
 }));
+
 // Logging
 app.use(morgan('combined'));
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Root route (for Render testing)
+app.get('/', (req, res) => {
+  res.send('DigitalFarm Backend is running 🚀');
+});
+
 
 // Health check
 app.get('/health', (req, res) => res.status(200).json({ status: 'OK', message: 'DigitalFarm Backend running' }));
