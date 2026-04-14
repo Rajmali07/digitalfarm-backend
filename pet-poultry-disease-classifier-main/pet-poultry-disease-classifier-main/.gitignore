@@ -1,0 +1,53 @@
+# ── Virtual Environment ──
+venv/
+env/
+.env
+.venv/
+
+# ── Model Weights (stored on Hugging Face Hub) ──
+*.pth
+*.pt
+*.onnx
+*.bin
+
+# ── Dataset ──
+data/
+
+# ── Auto-generated Research Outputs ──
+research_outputs/
+
+# ── Screenshots (keep only these 2) ──
+screenshots/*
+!screenshots/webapp-home.png
+!screenshots/confusion-matrix.png
+
+# ── Python Cache ──
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ── Logs ──
+*.log
+training_log.json
+logs/
+
+# ── OS Files ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Jupyter ──
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Testing ──
+.pytest_cache/
+.coverage
+htmlcov/
