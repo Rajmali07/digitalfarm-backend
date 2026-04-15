@@ -11,18 +11,10 @@ const ML_ROOT = path.join(
   'pet-poultry-disease-classifier-main'
 );
 const ML_SCRIPT = path.join(ML_ROOT, 'predict_api.py');
-const ML_SITE_PACKAGES = path.join(
-  PROJECT_ROOT,
-  'backend',
-  'pet-poultry-disease-classifier-main',
-  'venv',
-  'Lib',
-  'site-packages'
-);
+const ML_SITE_PACKAGES = '';
 // const DEFAULT_ML_PYTHON_PATH = 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\python.exe';
-const DEFAULT_ML_PYTHON_PATH =
-  process.platform === 'win32' ? 'python' : 'python3';
-  
+const DEFAULT_ML_PYTHON_PATH = 'python';
+
 const SUPPORTED_ANIMAL_TYPES = new Set(['poultry', 'cat', 'dog']);
 
 function supportsMlAnimalType(animalType) {
