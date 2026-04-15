@@ -19,8 +19,10 @@ const ML_SITE_PACKAGES = path.join(
   'Lib',
   'site-packages'
 );
-const DEFAULT_ML_PYTHON_PATH = 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\python.exe';
-
+// const DEFAULT_ML_PYTHON_PATH = 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\python.exe';
+const DEFAULT_ML_PYTHON_PATH =
+  process.platform === 'win32' ? 'python' : 'python3';
+  
 const SUPPORTED_ANIMAL_TYPES = new Set(['poultry', 'cat', 'dog']);
 
 function supportsMlAnimalType(animalType) {
