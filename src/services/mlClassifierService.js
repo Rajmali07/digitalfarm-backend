@@ -6,7 +6,6 @@ const { execFile } = require('child_process');
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
 const ML_ROOT = path.join(
   PROJECT_ROOT,
-  'backend',
   'pet-poultry-disease-classifier-main',
   'pet-poultry-disease-classifier-main'
 );
