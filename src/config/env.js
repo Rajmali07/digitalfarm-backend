@@ -15,11 +15,14 @@ const env = {
   SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
   JWT_SECRET: process.env.JWT_SECRET,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  GEMINI_MODEL: process.env.GEMINI_MODEL,
   EMAIL_HOST: process.env.EMAIL_HOST,
   EMAIL_PORT: process.env.EMAIL_PORT,
   EMAIL_USER: process.env.EMAIL_USER,
   EMAIL_PASS: process.env.EMAIL_PASS,
   WEATHER_API_KEY: process.env.WEATHER_API_KEY,
+  CORS_ORIGINS: process.env.CORS_ORIGINS,
 };
 
 // 🔥 Debug (temporary)

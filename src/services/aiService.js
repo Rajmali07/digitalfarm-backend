@@ -1,13 +1,22 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { predictDiseaseFromImage } = require("./mlClassifierService");
+const { env } = require("../config/env");
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY =
+  env.GEMINI_API_KEY ||
+  process.env.GEMINI_API_KEY ||
+  process.env.GOOGLE_API_KEY ||
+  "";
 const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_MODEL = env.GEMINI_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 const isProviderTemporaryError = (error) => {
   const message = String(error?.message || "").toLowerCase();
   return (
+    message.includes("429") ||
+    message.includes("quota") ||
+    message.includes("rate limit") ||
+    message.includes("too many requests") ||
     message.includes("503") ||
     message.includes("service unavailable") ||
     message.includes("high demand") ||
@@ -46,6 +55,23 @@ const normalizeConfidence = (value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const normalizeList = (value, fallback = []) => {
+  if (Array.isArray(value)) {
+    const cleaned = value
+      .map((item) => String(item || "").trim())
+      .filter(Boolean)
+      .slice(0, 5);
+
+    if (cleaned.length) return cleaned;
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    return [value.trim()];
+  }
+
+  return fallback;
+};
+
 const buildFallbackFromML = (mlPrediction, reasonMessage) => {
   const hasMlResult = mlPrediction?.available;
   const fallbackDisease = hasMlResult ? mlPrediction.disease || "Unknown" : "Unknown";
@@ -57,10 +83,23 @@ const buildFallbackFromML = (mlPrediction, reasonMessage) => {
     disease: fallbackDisease,
     confidence: fallbackConfidence,
     severity: "Medium",
+    display: `${fallbackDisease} (${fallbackConfidence}%)`,
     analysis: hasMlResult
       ? "Gemini symptom analysis is temporarily unavailable. Image-based prediction was used."
       : "AI provider is temporarily unavailable. Please retry shortly.",
     recommendation: "Isolate affected animals and consult a veterinarian.",
+    causes: [
+      "Infectious exposure from sick animals or contaminated surfaces",
+      "Poor hygiene, damp housing, or delayed isolation"
+    ],
+    treatment: [
+      "Isolate the animal and clean bedding/equipment",
+      "Consult a veterinarian for confirmed diagnosis and medicine"
+    ],
+    prevention: [
+      "Maintain regular cleaning and disinfection schedule",
+      "Quarantine new/sick animals before mixing"
+    ],
     gemini: {
       available: false,
       disease: "Unavailable",
@@ -123,7 +162,10 @@ Return ONLY valid JSON (no other text):
   "confidence": 65-95,
   "severity": "Low|Medium|High|Critical",
   "analysis": "Brief veterinary reasoning (2-4 sentences)",
-  "recommendation": "Practical farm actions + when to call vet"
+  "recommendation": "Practical farm actions + when to call vet",
+  "causes": ["Likely cause 1", "Likely cause 2"],
+  "treatment": ["Immediate treatment step 1", "Immediate treatment step 2"],
+  "prevention": ["Prevention tip 1", "Prevention tip 2"]
 }
 `;
 
@@ -144,15 +186,23 @@ Return ONLY valid JSON (no other text):
   }
 
   if (parsed) {
+    const disease = parsed.disease || mlPrediction.disease || "Unknown";
+    const confidence = normalizeConfidence(parsed.confidence || mlPrediction.confidence);
+
     return {
-      disease: parsed.disease || mlPrediction.disease || "Unknown",
-      confidence: normalizeConfidence(parsed.confidence || mlPrediction.confidence),
+      disease,
+      confidence,
       severity: parsed.severity || "Medium",
+      display: `${disease} (${confidence}%)`,
       analysis: parsed.analysis || "No detailed analysis returned.",
       recommendation: parsed.recommendation || "Consult vet",
+      causes: normalizeList(parsed.causes, ["No specific causes returned by Gemini."]),
+      treatment: normalizeList(parsed.treatment, ["Consult veterinarian for targeted treatment plan."]),
+      prevention: normalizeList(parsed.prevention, ["Maintain hygiene and monitor symptoms daily."]),
       gemini: {
-        disease: parsed.disease || "Unknown",
-        confidence: normalizeConfidence(parsed.confidence),
+        available: true,
+        disease: parsed.disease || disease,
+        confidence,
         severity: parsed.severity || "Medium",
         analysis: parsed.analysis || "No detailed analysis returned.",
         recommendation: parsed.recommendation || "Consult vet",
@@ -177,9 +227,14 @@ Return ONLY valid JSON (no other text):
     disease: "Unknown",
     confidence: 70,
     severity: "Medium",
+    display: "Unknown (70%)",
     analysis: response,
     recommendation: "Consult vet",
+    causes: ["No structured causes returned by AI."],
+    treatment: ["Consult veterinarian for treatment."],
+    prevention: ["Follow routine biosecurity and hygiene."],
     gemini: {
+      available: true,
       disease: "Unknown",
       confidence: 70,
       severity: "Medium",
