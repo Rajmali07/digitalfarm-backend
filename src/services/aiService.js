@@ -1,7 +1,8 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { predictDiseaseFromImage } = require("./mlClassifierService");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 const isProviderTemporaryError = (error) => {
@@ -76,10 +77,6 @@ const buildFallbackFromML = (mlPrediction, reasonMessage) => {
 const analyzeRisk = async (farmData, file) => {
   const { animalType, symptoms } = farmData;
 
-  const model = genAI.getGenerativeModel({
-    model: GEMINI_MODEL,
-  });
-
   let imagePart = null;
 
   if (file) {
@@ -96,6 +93,14 @@ const analyzeRisk = async (farmData, file) => {
     skipped: true,
     message: error.message || "ML image prediction failed.",
   }));
+
+  if (!genAI) {
+    return buildFallbackFromML(mlPrediction, "GEMINI_API_KEY is not configured.");
+  }
+
+  const model = genAI.getGenerativeModel({
+    model: GEMINI_MODEL,
+  });
 
 const prompt = `
 You are an expert Indian farm and pet veterinarian AI specialist.
@@ -217,6 +222,10 @@ const buildNarrativeFallback = (payload = {}, reasonMessage = '') => {
 };
 
 const analyzeDashboardRiskNarrative = async (payload = {}) => {
+  if (!genAI) {
+    return buildNarrativeFallback(payload, "GEMINI_API_KEY is not configured.");
+  }
+
   const model = genAI.getGenerativeModel({
     model: GEMINI_MODEL,
   });

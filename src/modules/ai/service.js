@@ -33,26 +33,37 @@ const analyzeAndSave = async (userId, farmData, file) => {
   const result = await analyzeRisk(farmData, file);
 
   // ✅ Save to DB
-  const { data, error } = await supabase
-    .from('ai_diagnosis')
-    .insert([
-      {
-        farmer_id: userId,
-        symptoms: farmData.symptoms,
-        predicted_disease: result.disease,
-        confidence: parseFloat(result.confidence) || 0,
-        severity: result.severity,
-        recommendation: result.recommendation,
-        image_url: imageUrl, // 🔥 IMPORTANT
-      },
-    ])
-    .select();
+  let saved = null;
 
-  if (error) throw error;
+  try {
+    const { data, error } = await supabase
+      .from('ai_diagnosis')
+      .insert([
+        {
+          farmer_id: userId,
+          symptoms: farmData.symptoms,
+          predicted_disease: result.disease,
+          confidence: parseFloat(result.confidence) || 0,
+          severity: result.severity,
+          recommendation: result.recommendation,
+          image_url: imageUrl, // 🔥 IMPORTANT
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error('AI diagnosis save error:', error.message || error);
+    } else {
+      saved = Array.isArray(data) ? data[0] : data?.[0] || null;
+    }
+  } catch (saveError) {
+    console.error('AI diagnosis save exception:', saveError.message || saveError);
+  }
 
   return {
     analysis: result,
-    saved: data[0],
+    saved,
+    warning: saved ? null : 'Analysis completed, but history could not be saved.'
   };
 };
 

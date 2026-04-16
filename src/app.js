@@ -11,7 +11,10 @@ const app = express();
 
 // Security middleware
 app.use(cors({
-  origin: "*",
+  origin: [
+    "http://localhost:5173",
+    "https://aidigitalfarm.netlify.app"
+  ],
   credentials: true
 }));
 
