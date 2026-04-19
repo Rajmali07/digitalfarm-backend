@@ -1,7 +1,13 @@
 const { createClient } = require('@supabase/supabase-js');
 const { env } = require('./env');
-console.log("URL:", env.SUPABASE_URL);
-console.log("KEY:", env.SUPABASE_SERVICE_KEY?.slice(0, 20));
+
+if (!env.SUPABASE_URL) {
+  throw new Error('Missing SUPABASE_URL in backend environment');
+}
+
+if (!env.SUPABASE_SERVICE_KEY) {
+  throw new Error('Missing Supabase service key. Set SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_ROLE_KEY');
+}
 
 // Use SERVICE ROLE KEY for backend (IMPORTANT)
 const supabase = createClient(

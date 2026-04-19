@@ -12,7 +12,10 @@ const env = {
   PORT: process.env.PORT || 5000,
   SUPABASE_URL: process.env.SUPABASE_URL,
   SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
-  SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
+  SUPABASE_SERVICE_KEY:
+    process.env.SUPABASE_SERVICE_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SECRET_KEY,
   JWT_SECRET: process.env.JWT_SECRET,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
@@ -24,11 +27,6 @@ const env = {
   WEATHER_API_KEY: process.env.WEATHER_API_KEY,
   CORS_ORIGINS: process.env.CORS_ORIGINS,
 };
-
-// 🔥 Debug (temporary)
-console.log("ENV CHECK:");
-console.log("SUPABASE_URL:", env.SUPABASE_URL);
-console.log("SUPABASE_SERVICE_KEY EXISTS:", !!env.SUPABASE_SERVICE_KEY);
 
 module.exports = { env };
 

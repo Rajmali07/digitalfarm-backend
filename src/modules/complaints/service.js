@@ -120,14 +120,16 @@ const updateComplaint = async (complaintId, payload, file) => {
       });
 
     if (uploadError) {
-      throw uploadError;
+      // Do not fail the entire prescription sync if storage policy blocks attachment upload.
+      console.error('Prescription attachment upload failed:', uploadError.message || uploadError);
+      normalizedPayload.prescriptionFileUrl = null;
+    } else {
+      const { data: publicUrlData } = supabase.storage
+        .from(PRESCRIPTIONS_BUCKET)
+        .getPublicUrl(filePath);
+
+      normalizedPayload.prescriptionFileUrl = publicUrlData?.publicUrl || null;
     }
-
-    const { data: publicUrlData } = supabase.storage
-      .from(PRESCRIPTIONS_BUCKET)
-      .getPublicUrl(filePath);
-
-    normalizedPayload.prescriptionFileUrl = publicUrlData?.publicUrl || null;
   }
 
   const { data: complaintBeforeUpdate, error: complaintFetchError } = await supabase
